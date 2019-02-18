@@ -2,7 +2,6 @@
 from _socket import *
 import pyaudio
 import datetime
-import wave
 
 
 CHUNK         = 1024
@@ -14,9 +13,9 @@ HOST          = ''
 PORT          = 8080
 
 def init_audio(channels=CHANNELS, rate=RATE, frames_per_buffer=CHUNK, FORMAT=pyaudio.paInt16):
-    print "init_audio: Create PyAudio object"
+    print("init_audio: Create PyAudio object")
     pa = pyaudio.PyAudio()
-    print "init_audio: Open stream"
+    print("init_audio: Open stream")
     s = pa.open(
         output=True,
         channels = channels,
@@ -24,13 +23,13 @@ def init_audio(channels=CHANNELS, rate=RATE, frames_per_buffer=CHUNK, FORMAT=pya
         format = FORMAT,
         frames_per_buffer=frames_per_buffer
     )
-    print "init_audio: audio stream initialized"
+    print("init_audio: audio stream initialized")
     return pa, s
 
 def close_audio(pa, s):
-    print "close_audio: Closing stream"
+    print("close_audio: Closing stream")
     s.close()
-    print "close_audio: Terminating PyAudio Object"
+    print("close_audio: Terminating PyAudio Object")
     pa.terminate()
 
 # for i in range(100):
@@ -60,13 +59,13 @@ def close_audio(pa, s):
 if __name__ == "__main__":
     client = socket(AF_INET, SOCK_STREAM)
     client.connect(('127.0.0.1', 8080))
-    print '연결 확인 됐습니다.'
+    print('연결 확인 됐습니다.')
     client.send('I am a client'.encode('utf-8'))
-    print'메시지를 전송했습니다.'
+    print('메시지를 전송했습니다.')
 
     pa, s = init_audio()
 
     while True:
         data = client.recv(CHUNK)
-        print '데이터 수신 : ', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print('데이터 수신 : ', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         s.write(data)
