@@ -1,10 +1,9 @@
 #-*- coding: utf-8 -*-
 #!/usr/bin/python
-import os
 import pyaudio
-import signal
-from socket import socket, error, AF_INET, SOCK_STREAM
 import datetime
+from socket import socket, error, AF_INET, SOCK_STREAM
+
 
 CHUNK         = 1024
 CHANNELS      = 1
@@ -12,7 +11,7 @@ RATE          = 44100
 DELAY_SECONDS = 5
 DELAY_SIZE    = DELAY_SECONDS * RATE / (10 * CHUNK)
 HOST          = ''
-PORT          = 8080
+PORT          = 8089
 FORMAT        = pyaudio.paInt16
 
 
@@ -52,7 +51,7 @@ def close_audio(pa, s):
     pa.terminate()
 
 def recode(s, duration):
-    audio = str()
+    audio = bytes()
     for i in range(int(RATE / CHUNK * duration)):
         data = s.read(CHUNK)
         audio = audio + data
@@ -68,20 +67,11 @@ def get_callback(self):
 
     return callback
 
-def sigint_handler(signum, frame):
-    close_audio(pa, s)
-
-signal.signal(signal.SIGINT, sigint_handler)
-
 
 if __name__ == "__main__":
     while True:
         Server = socket(AF_INET, SOCK_STREAM)
-        try:
-            Server.bind((HOST, PORT))
-        except error:
-            os.system('lsof -i :' + str(PORT))
-            Server.bind((HOST, PORT))
+        Server.bind((HOST, PORT))
         Server.listen(1)
 
         connection, addr = Server.accept()
@@ -93,13 +83,9 @@ if __name__ == "__main__":
             while True:
                 try:
                     audio = recode(s, 0.2)
-                    # print audio
-                    # print len(audio)
-                    # print type(audio)
                     connection.send(audio)
                     print('메시지를 보냈습니다. : ', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                 except error:
                     close_audio(pa, s)
+                    Server.close()
                     break
-        else:
-            print('Go away! Stranger!')
